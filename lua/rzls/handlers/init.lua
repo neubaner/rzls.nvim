@@ -40,8 +40,8 @@ return {
     ["razor/updateHtmlBuffer"] = function(_err, result)
         documentstore.update_vbuf(result, razor.language_kinds.html)
     end,
-    ["razor/provideCodeActions"] = not_implemented,
-    ["razor/resolveCodeActions"] = not_implemented,
+    ["razor/provideCodeActions"] = require("rzls.handlers.providecodeactions"),
+    ["razor/resolveCodeActions"] = require("rzls.handlers.resolvecodeactions"),
     ["razor/provideHtmlColorPresentation"] = not_supported,
     ["razor/provideHtmlDocumentColor"] = require("rzls.handlers.providehtmldocumentcolor"),
     ["razor/provideSemanticTokensRange"] = require("rzls.handlers.providesemantictokensrange"),
@@ -66,10 +66,12 @@ return {
 
     -- Called to get C# diagnostics from Roslyn when publishing diagnostics for VS Code
     ["razor/csharpPullDiagnostics"] = require("rzls.handlers.csharppulldiagnostics"),
-    ["textDocument/colorPresentation"] = not_supported,
     ["razor/completion"] = require("rzls.handlers.completion"),
     ["razor/completionItem/resolve"] = require("rzls.handlers.completionitemresolve"),
-    ["window/logMessage"] = function(_, result)
+
+    -- Standard LSP methods
+    [vim.lsp.protocol.Methods.textDocument_colorPresentation] = not_supported,
+    [vim.lsp.protocol.Methods.window_logMessage] = function(_, result)
         Log.rzls = result.message
         return vim.lsp.handlers[vim.lsp.protocol.Methods.window_logMessage]
     end,
