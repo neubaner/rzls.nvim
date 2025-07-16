@@ -19,7 +19,7 @@ local function provide_lsp_completions(virtual_document, projected_position, tri
             uri = virtual_document.uri,
         },
     }
-    local response = virtual_document:lsp_request(vim.lsp.protocol.Methods.textDocument_completion, params)
+    local response = virtual_document:lsp_request_sync(vim.lsp.protocol.Methods.textDocument_completion, params)
 
     if not response then
         ---@type lsp.CompletionList

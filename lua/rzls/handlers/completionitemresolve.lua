@@ -22,7 +22,7 @@ return function(_err, result, _ctx, _config)
 
         ---@type lsp.CompletionItem
         local response =
-            virtual_document:lsp_request(vim.lsp.protocol.Methods.completionItem_resolve, result.completionItem)
+            virtual_document:lsp_request_sync(vim.lsp.protocol.Methods.completionItem_resolve, result.completionItem)
 
         if virtual_document.provisional_dot_position and virtual_document:remove_resolve_provisional_dot() then
             virtual_document:ensure_content()

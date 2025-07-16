@@ -358,4 +358,39 @@ function VirtualDocument:lsp_request(method, params, buf)
     return coroutine.yield()
 end
 
+--- issues an LSP request synchronously to the virtual document.
+--- Please use by passing a method from `vim.lsp.protocl.Methods`
+--- and type the expected return value as optional.
+---@param method string
+---@param params table
+---@param buf number?
+---@param timeout number?
+---@return any|nil    # result on success, nil on failure.
+---@return nil|lsp.ResponseError # nil on success, error message on failure.
+function VirtualDocument:lsp_request_sync(method, params, buf, timeout)
+    assert(vim.api.nvim_buf_is_loaded(self.buf), "attempted to attach to unloaded buffer")
+    local lsp = self:get_lsp_client()
+    if not lsp then
+        lsp = self:attach_lsp()
+        if not lsp then
+            --HACK: if we still dont have an lsp we are doomed
+            Log.rzlsnvim = "[" .. method .. "]LSP client not found for " .. self.uri
+            return nil, vim.lsp.rpc_response_error(vim.lsp.protocol.ErrorCodes.InvalidRequest, "LSP client not found")
+        end
+    end
+
+    local response = lsp:request_sync(method, params, timeout, buf or self.buf)
+    if not response or response.err then
+        Log.rzlsnvim = "LSP request failed for " .. self.uri .. ": " .. vim.inspect(response and response.err)
+        Log.rzlsnvim = vim.inspect({ method = method, params = params })
+        return nil,
+            response and response.err or vim.lsp.rpc_response_error(
+                vim.lsp.protocol.ErrorCodes.InvalidRequest,
+                "LSP request failed"
+            )
+    end
+
+    return response.result, nil
+end
+
 return VirtualDocument
